@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruleta de Conductas de Servicio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   TOKENS — paleta e identidad visual
+   ========================================================= */
+:root{
+  --azul-oscuro:#12276A;
+  --azul-claro:#1EA0CF;
+  --morado:#7C3397;
+  --fucsia:#E50072;
+
+  --azul-oscuro-10: rgba(18,39,106,0.08);
+  --azul-claro-10: rgba(30,160,207,0.10);
+  --fucsia-10: rgba(229,0,114,0.08);
+
+  --bg: #F6F7FB;
+  --card-bg: #FFFFFF;
+  --texto: #1B1E2B;
+  --texto-suave: #5B6072;
+  --borde: #E7E9F2;
+
+  --sombra-sm: 0 2px 8px rgba(18,39,106,0.06);
+  --sombra-md: 0 12px 32px rgba(18,39,106,0.12);
+  --sombra-lg: 0 24px 64px rgba(18,39,106,0.18);
+
+  --radio: 24px;
+  --radio-sm: 14px;
+
+  --font: "Gotham","Montserrat","Arial",sans-serif;
+}
+
+*{ box-sizing:border-box; }
+
+html{ scroll-behavior:smooth; }
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:var(--font);
+  background:
+    radial-gradient(1200px 600px at 15% -10%, var(--azul-claro-10), transparent 60%),
+    radial-gradient(1000px 500px at 110% 10%, var(--fucsia-10), transparent 55%),
+    var(--bg);
+  color:var(--texto);
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Foco visible para accesibilidad con teclado */
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible{
+  outline:3px solid var(--azul-claro);
+  outline-offset:3px;
+  border-radius:8px;
+}
+
+.contenedor{
+  max-width:1180px;
+  margin:0 auto;
+  padding:48px 24px 96px;
+}
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+.encabezado{
+  text-align:center;
+  margin-bottom:40px;
+}
+
+.titulo{
+  font-size:clamp(30px,4.4vw,48px);
+  font-weight:800;
+  color:var(--azul-oscuro);
+  margin:0 0 14px;
+  letter-spacing:-0.02em;
+}
+
+.subtitulo{
+  font-size:clamp(16px,2vw,19px);
+  color:var(--texto-suave);
+  margin:0;
+  font-weight:500;
+}
+
+/* =========================================================
+   PANTALLA DE INICIO (instrucciones)
+   ========================================================= */
+.pantalla-instrucciones{
+  max-width:640px;
+  margin:0 auto;
+  text-align:center;
+}
+
+.tarjeta-inicio{
+  background:var(--card-bg);
+  border-radius:var(--radio);
+  box-shadow:var(--sombra-md);
+  padding:clamp(32px,5vw,56px) clamp(24px,5vw,56px);
+  border:1px solid var(--borde);
+}
+
+.instrucciones-texto{
+  font-size:17px;
+  color:var(--texto-suave);
+  margin:0 0 36px;
+  line-height:1.65;
+  font-weight:500;
+}
+
+/* =========================================================
+   ESCENARIO DE LA RULETA
+   ========================================================= */
+.escenario{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:32px;
+}
+
+.rueda-envoltorio{
+  position:relative;
+  width:min(480px, 88vw);
+  aspect-ratio:1/1;
+  filter:drop-shadow(var(--sombra-lg));
+}
+
+.puntero{
+  position:absolute;
+  top:-6px;
+  left:50%;
+  transform:translateX(-50%);
+  width:44px;
+  height:54px;
+  z-index:5;
+  filter:drop-shadow(0 4px 10px rgba(18,39,106,.35));
+}
+
+.rueda-svg{
+  width:100%;
+  height:100%;
+  display:block;
+  transform:rotate(0deg);
+  will-change:transform;
+}
+
+#grupo-rueda{
+  transform-origin:280px 280px;
+  transition:transform 4.2s cubic-bezier(0.11,0.79,0.11,1);
+}
+
+.segmento-etiqueta{
+  font-family:var(--font);
+  fill:#fff;
+  font-weight:700;
+  pointer-events:none;
+  user-select:none;
+}
+
+.segmento-icono{
+  font-size:26px;
+  pointer-events:none;
+  user-select:none;
+}
+
+.buje{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:34%;
+  height:34%;
+  border-radius:50%;
+  background:linear-gradient(145deg,#ffffff,#eef1fb);
+  box-shadow: var(--sombra-md), inset 0 0 0 6px #ffffff;
+  z-index:4;
+}
+
+/* Botones */
+.btn{
+  font-family:var(--font);
+  border:none;
+  cursor:pointer;
+  font-weight:700;
+  font-size:16px;
+  border-radius:999px;
+  padding:18px 40px;
+  transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+  letter-spacing:0.01em;
+}
+
+.btn:active{ transform:translateY(1px) scale(.99); }
+
+.btn-primario{
+  color:#fff;
+  background:linear-gradient(120deg, var(--azul-oscuro), var(--morado) 60%, var(--fucsia) 130%);
+  box-shadow:0 10px 24px rgba(124,51,151,.35);
+}
+.btn-primario:hover{ transform:translateY(-3px); box-shadow:0 16px 32px rgba(124,51,151,.42); filter:brightness(1.04); }
+.btn-primario:disabled{ opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+
+.btn-secundario{
+  color:var(--azul-oscuro);
+  background:#fff;
+  border:2px solid var(--borde);
+  box-shadow:var(--sombra-sm);
+}
+.btn-secundario:hover{ transform:translateY(-3px); border-color:var(--azul-claro); box-shadow:var(--sombra-md); }
+
+.btn-grande{ min-width:220px; min-height:60px; font-size:17px; }
+
+.zona-boton{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+/* =========================================================
+   TARJETA DE RESULTADO (situación)
+   ========================================================= */
+.tarjeta-resultado{
+  width:100%;
+  max-width:760px;
+  background:var(--card-bg);
+  border-radius:var(--radio);
+  box-shadow:var(--sombra-md);
+  padding:40px clamp(24px,4vw,48px);
+  text-align:center;
+  border:1px solid var(--borde);
+  opacity:0;
+  transform:translateY(24px);
+  pointer-events:none;
+  max-height:0;
+  overflow:hidden;
+  transition:opacity .55s ease, transform .55s ease, max-height .1s linear, margin .55s ease, padding .55s ease;
+}
+
+.tarjeta-resultado.visible{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+  max-height:900px;
+  margin-top:4px;
+}
+
+.insignia-caso{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  background:var(--azul-oscuro-10);
+  color:var(--azul-oscuro);
+  font-weight:700;
+  font-size:14px;
+  padding:8px 18px;
+  border-radius:999px;
+  margin-bottom:20px;
+}
+
+.insignia-caso .icono{ font-size:18px; }
+
+.texto-situacion{
+  font-size:clamp(19px,2.4vw,24px);
+  font-weight:600;
+  color:var(--texto);
+  margin:0 0 28px;
+  line-height:1.5;
+}
+
+/* =========================================================
+   COMPARATIVA — BUEN SERVICIO vs DELEITE
+   ========================================================= */
+.comparativa{
+  width:100%;
+  max-width:980px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+  margin-top:8px;
+}
+
+@media (max-width:720px){
+  .comparativa{ grid-template-columns:1fr; }
+}
+
+.columna{
+  border-radius:var(--radio);
+  padding:32px 28px;
+  color:#fff;
+  box-shadow:var(--sombra-md);
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity .6s ease, transform .6s ease;
+  position:relative;
+  overflow:hidden;
+}
+
+.columna.mostrar{ opacity:1; transform:translateY(0); }
+
+.columna::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(220px 220px at 100% 0%, rgba(255,255,255,.16), transparent 65%);
+  pointer-events:none;
+}
+
+.columna-buen-servicio{
+  background:linear-gradient(155deg, var(--azul-oscuro), var(--azul-claro) 130%);
+  transition-delay:.05s;
+}
+
+.columna-deleite{
+  background:linear-gradient(155deg, var(--morado), var(--fucsia) 120%);
+  transition-delay:.28s;
+}
+
+.columna-eyebrow{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  opacity:.85;
+  margin:0 0 6px;
+}
+
+.columna-titulo{
+  font-size:clamp(20px,2.4vw,26px);
+  font-weight:800;
+  margin:0 0 4px;
+  letter-spacing:-0.01em;
+}
+
+.columna-subtitulo{
+  font-size:14px;
+  font-weight:600;
+  opacity:.88;
+  margin:0 0 20px;
+}
+
+.columna-lista{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.columna-lista li{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  font-size:16px;
+  font-weight:500;
+  line-height:1.5;
+}
+
+.marca-lista{
+  flex:0 0 auto;
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:rgba(255,255,255,.22);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  margin-top:2px;
+}
+
+.pie-comparativa{
+  width:100%;
+  max-width:980px;
+  display:flex;
+  justify-content:center;
+  margin-top:36px;
+  opacity:0;
+  transform:translateY(16px);
+  transition:opacity .5s ease .5s, transform .5s ease .5s;
+}
+
+.pie-comparativa.mostrar{ opacity:1; transform:translateY(0); }
+
+/* Región para lectores de pantalla */
+.sr-solo{
+  position:absolute;
+  width:1px; height:1px;
+  padding:0; margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+
+/* Animación sutil del contenedor de la rueda al girar */
+.girando .rueda-envoltorio{ animation:pulso 1.8s ease-in-out infinite; }
+@keyframes pulso{
+  0%,100%{ filter:drop-shadow(var(--sombra-lg)); }
+  50%{ filter:drop-shadow(0 30px 70px rgba(229,0,114,.28)); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  #grupo-rueda{ transition-duration:.6s; }
+  .girando .rueda-envoltorio{ animation:none; }
+  .tarjeta-resultado, .columna, .pie-comparativa{ transition:none; }
+}
+</style>
+</head>
+<body>
+
+<div class="contenedor">
+
+  <!-- ============ PANTALLA 1: INSTRUCCIONES ============ -->
+  <section class="pantalla-instrucciones" id="pantalla-instrucciones">
+    <div class="tarjeta-inicio">
+      <h1 class="titulo">¿Qué harías si se te presenta alguna de estas situaciones con un cliente?</h1>
+      <p class="instrucciones-texto">
+        Giren la ruleta y analicen cada caso como una oportunidad para deleitar al cliente.
+      </p>
+      <div class="zona-boton">
+        <button type="button" class="btn btn-primario btn-grande" id="btn-continuar">
+          Continuar
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PANTALLA 2: RULETA ============ -->
+  <div id="pantalla-ruleta" hidden>
+
+  <!-- ============ ENCABEZADO ============ -->
+  <header class="encabezado">
+    <h1 class="titulo">¿Qué harías en esta situación?</h1>
+    <p class="subtitulo">Girá la ruleta y analizá un caso de servicio al cliente.</p>
+  </header>
+
+  <!-- ============ ESCENARIO PRINCIPAL ============ -->
+  <main class="escenario">
+
+    <div class="rueda-envoltorio" id="envoltorio-rueda">
+      <!-- Puntero fijo -->
+      <svg class="puntero" viewBox="0 0 44 54" aria-hidden="true">
+        <path d="M22 54 L2 14 A22 22 0 0 1 42 14 Z" fill="#12276A"/>
+        <circle cx="22" cy="16" r="9" fill="#E50072"/>
+      </svg>
+
+      <!-- La ruleta se dibuja dinámicamente con JavaScript -->
+      <svg class="rueda-svg" id="svg-rueda" viewBox="0 0 560 560" role="img" aria-label="Ruleta de situaciones de servicio al cliente">
+        <g id="grupo-rueda"></g>
+      </svg>
+
+      <div class="buje" aria-hidden="true"></div>
+    </div>
+
+    <div class="zona-boton">
+      <button type="button" class="btn btn-primario btn-grande" id="btn-girar">
+        Girar
+      </button>
+    </div>
+
+    <!-- Región viva para anunciar el resultado a lectores de pantalla -->
+    <p class="sr-solo" id="anuncio-lector" aria-live="polite"></p>
+
+    <!-- ============ TARJETA DE RESULTADO ============ -->
+    <section class="tarjeta-resultado" id="tarjeta-resultado" aria-live="polite">
+      <span class="insignia-caso" id="insignia-caso">
+        <span class="icono" id="insignia-icono">🎯</span>
+        <span id="insignia-nombre">Caso</span>
+      </span>
+      <p class="texto-situacion" id="texto-situacion">—</p>
+      <div class="zona-boton">
+        <button type="button" class="btn btn-secundario btn-grande" id="btn-ver-respuesta">
+          Ver cómo deberíamos actuar
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ COMPARATIVA BUEN SERVICIO / DELEITE ============ -->
+    <section class="comparativa" id="comparativa" hidden>
+      <article class="columna columna-buen-servicio" id="columna-buen-servicio">
+        <p class="columna-eyebrow">Conductas 1–4</p>
+        <h2 class="columna-titulo">Buen servicio</h2>
+        <p class="columna-subtitulo">Lo que el cliente espera recibir</p>
+        <ul class="columna-lista" id="lista-buen-servicio"></ul>
+      </article>
+
+      <article class="columna columna-deleite" id="columna-deleite">
+        <p class="columna-eyebrow">Conducta 5</p>
+        <h2 class="columna-titulo">Deleite</h2>
+        <p class="columna-subtitulo">El siguiente nivel de servicio</p>
+        <ul class="columna-lista" id="lista-deleite"></ul>
+      </article>
+    </section>
+
+    <div class="pie-comparativa" id="pie-comparativa" hidden>
+      <div class="zona-boton">
+        <button type="button" class="btn btn-primario btn-grande" id="btn-girar-de-nuevo">
+          Girar de nuevo
+        </button>
+      </div>
+    </div>
+
+  </main>
+  </div> <!-- cierre #pantalla-ruleta -->
+</div>
+
+<script>
+/* =========================================================
+   DATOS — casos de servicio (Conductas 1-4 vs Conducta 5)
+   Separado del resto de la lógica para poder añadir casos
+   nuevos fácilmente en el futuro.
+   ========================================================= */
+const CASOS = [
+  {
+    nombreCorto:"Producto agotado",
+    icono:"📦",
+    situacion:"Un cliente llega buscando un producto que está agotado y se muestra frustrado porque lo necesita con urgencia.",
+    buenServicio:["Informa que no hay y ofrece un sustituto."],
+    deleite:["Llama a otra sucursal, confirma disponibilidad y se lo reserva al cliente."]
+  },
+  {
+    nombreCorto:"Receta larga",
+    icono:"👵",
+    situacion:"Un cliente mayor llega con una receta larga y necesita ayuda para organizar todos sus medicamentos.",
+    buenServicio:["Atiende con paciencia y agilidad."],
+    deleite:["Organiza los medicamentos por horario, sin que se lo pidan."]
+  },
+  {
+    nombreCorto:"Insulina sin stock",
+    icono:"💉",
+    situacion:"Un cliente diabético necesita insulina, pero la sucursal no tiene stock disponible en ese momento.",
+    buenServicio:["Informa que no está disponible y sugiere volver más tarde."],
+    deleite:["Se comunica personalmente con otra sucursal para verificar disponibilidad y reservar el tratamiento."]
+  },
+  {
+    nombreCorto:"Cliente apurado",
+    icono:"⏱️",
+    situacion:"Un cliente entra visiblemente ansioso y con apuro; se nota que necesita resolver su compra rápido.",
+    buenServicio:["Le ofrece un canasto para su compra."],
+    deleite:["Se ofrece a buscar los productos que tenga en la lista."]
+  },
+  {
+    nombreCorto:"Familiar enfermo",
+    icono:"😢",
+    situacion:"Un cliente llega a la sucursal llorando porque un familiar está enfermo.",
+    buenServicio:["Lo atiende con empatía y agilidad para no incomodarlo."],
+    deleite:["Se toma un momento humano con él, fuera del guion de venta, solo para acompañarlo emocionalmente antes de seguir."]
+  },
+  {
+    nombreCorto:"Mamá primeriza",
+    icono:"👶",
+    situacion:"Una mamá primeriza se ve abrumada mientras compra productos para su bebé recién nacido.",
+    buenServicio:["Explica las opciones disponibles con paciencia."],
+    deleite:["Le comenta los esenciales que va a necesitar en las próximas semanas, sin que se lo pida."]
+  },
+  {
+    nombreCorto:"Cliente mayor solo",
+    icono:"💬",
+    situacion:"Un cliente mayor que suele ir solo a la sucursal se queda charlando más tiempo del habitual.",
+    buenServicio:["Lo atiende con amabilidad."],
+    deleite:["Le dedica unos minutos genuinos de charla porque nota que ese intercambio es importante para él."]
+  },
+  {
+    nombreCorto:"Emergencia familiar",
+    icono:"🚨",
+    situacion:"Un cliente llega visiblemente estresado porque está viviendo una emergencia familiar.",
+    buenServicio:["Prioriza atenderlo con rapidez y calma."],
+    deleite:["Le ofrece ayuda para llevar todo hasta el auto y le desea explícitamente que todo salga bien con su familiar."]
+  },
+  {
+    nombreCorto:"Lluvia fuerte",
+    icono:"🌧️",
+    situacion:"Está lloviendo fuerte y el cliente no puede llegar fácilmente a su auto con las compras.",
+    buenServicio:["Le ofrece una bolsa adicional para proteger los productos."],
+    deleite:["Lo acompaña con un paraguas o lo ayuda a resguardar la compra hasta que pueda salir con tranquilidad."]
+  },
+  {
+    nombreCorto:"Cartera olvidada",
+    icono:"👜",
+    situacion:"Un cliente se retira de la sucursal y deja olvidada su cartera o su bolso en el mostrador.",
+    buenServicio:["Lo guarda de forma segura hasta que regrese."],
+    deleite:["Intenta contactarlo en lugar de esperar a que se dé cuenta y vuelva preocupado."]
+  },
+  {
+    nombreCorto:"Changuito y chicos",
+    icono:"🛒",
+    situacion:"Un cliente con el changuito lleno y chicos pequeños a su cargo necesita ayuda para terminar su compra.",
+    buenServicio:["Le ofrece ayuda para embolsar."],
+    deleite:["Lo acompaña hasta el auto y ayuda a acomodar lo que haga falta."]
+  },
+  {
+    nombreCorto:"Cliente indeciso",
+    icono:"🤔",
+    situacion:"Un cliente está indeciso entre dos productos similares y no logra decidirse.",
+    buenServicio:["Explica las diferencias entre ambos."],
+    deleite:["Recuerda una preferencia mencionada antes y la usa para asesorar, sin que el cliente tenga que repetirla."]
+  },
+  {
+    nombreCorto:"Cumpleaños",
+    icono:"🎂",
+    situacion:"Un cliente menciona de pasada que hoy es su cumpleaños mientras hace su compra.",
+    buenServicio:["Atiende al cliente con educación y cercanía."],
+    deleite:["Lo saluda por su cumpleaños y lo atiende con especial emoción."]
+  },
+  {
+    nombreCorto:"Se va de viaje",
+    icono:"✈️",
+    situacion:"Un cliente comenta que está por irse de viaje mientras realiza su compra.",
+    buenServicio:["Asesora al cliente en los productos que solicita."],
+    deleite:["Le arma una recomendación completa de lo que suele hacer falta para viajar, sin que la haya pedido."]
+  },
+  {
+    nombreCorto:"Cliente que volvió",
+    icono:"🔄",
+    situacion:"Un cliente frecuente vuelve a la sucursal después de un tiempo sin visitarla.",
+    buenServicio:["Lo atiende con la misma calidad de siempre."],
+    deleite:["Le comenta que notó su ausencia y le pregunta con sinceridad cómo estuvo, generando una conexión real."]
+  },
+  {
+    nombreCorto:"Productos veterinarios",
+    icono:"🐾",
+    situacion:"Un cliente compra productos veterinarios para su mascota.",
+    buenServicio:["Ayuda a encontrar lo que busca."],
+    deleite:["Pregunta por el nombre y los gustos de la mascota y le hace un seguimiento la próxima vez que lo ve en la sucursal."]
+  },
+  {
+    nombreCorto:"Vitamina agotada",
+    icono:"💊",
+    situacion:"Un cliente pregunta por su vitamina favorita, pero no está disponible en ese momento.",
+    buenServicio:["Ofrece una alternativa similar."],
+    deleite:["Verifica su número de teléfono en el registro y se compromete a llamarlo una vez que el producto llegue a la sucursal."]
+  },
+  {
+    nombreCorto:"Subió el precio",
+    icono:"📈",
+    situacion:"Un cliente se sorprende porque el precio de un producto subió desde su última compra.",
+    buenServicio:["Explica el motivo del cambio con transparencia."],
+    deleite:["Lo ayuda activamente a encontrar la opción más conveniente para su presupuesto, sin que lo pida."]
+  },
+  {
+    nombreCorto:"Opción económica",
+    icono:"🏷️",
+    situacion:"Un cliente busca la opción más económica disponible de un medicamento.",
+    buenServicio:["Le muestra la presentación de menor precio."],
+    deleite:["Compara con él las distintas marcas y presentaciones para encontrar la mejor relación costo-beneficio real, no solo la más barata."]
+  }
+];
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+const estado = {
+  girando:false,
+  rotacionAcumulada:0,
+  ultimoIndice:null,
+  indiceActual:null
+};
+
+/* =========================================================
+   REFERENCIAS AL DOM
+   ========================================================= */
+const pantallaInstrucciones = document.getElementById("pantalla-instrucciones");
+const pantallaRuleta      = document.getElementById("pantalla-ruleta");
+const btnContinuar        = document.getElementById("btn-continuar");
+const grupoRueda          = document.getElementById("grupo-rueda");
+const btnGirar            = document.getElementById("btn-girar");
+const envoltorioRueda     = document.getElementById("envoltorio-rueda");
+const tarjetaResultado    = document.getElementById("tarjeta-resultado");
+const insigniaIcono       = document.getElementById("insignia-icono");
+const insigniaNombre      = document.getElementById("insignia-nombre");
+const textoSituacion      = document.getElementById("texto-situacion");
+const btnVerRespuesta     = document.getElementById("btn-ver-respuesta");
+const comparativa         = document.getElementById("comparativa");
+const columnaBuenServicio = document.getElementById("columna-buen-servicio");
+const columnaDeleite      = document.getElementById("columna-deleite");
+const listaBuenServicio   = document.getElementById("lista-buen-servicio");
+const listaDeleite        = document.getElementById("lista-deleite");
+const pieComparativa      = document.getElementById("pie-comparativa");
+const btnGirarDeNuevo     = document.getElementById("btn-girar-de-nuevo");
+const anuncioLector       = document.getElementById("anuncio-lector");
+
+/* Colores de segmento (paleta corporativa, alternados) */
+const COLORES_SEGMENTO = ["#12276A","#1EA0CF","#7C3397","#E50072"];
+
+/* =========================================================
+   PANTALLA DE INICIO → RULETA
+   ========================================================= */
+function mostrarPantallaRuleta(){
+  pantallaInstrucciones.hidden = true;
+  pantallaRuleta.hidden = false;
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+btnContinuar.addEventListener("click", mostrarPantallaRuleta);
+
+/* =========================================================
+   DIBUJO DE LA RULETA (SVG generado dinámicamente)
+   ========================================================= */
+const CENTRO = 280;
+const RADIO = 268;
+const N = CASOS.length;
+const ANGULO_SEGMENTO = 360 / N;
+
+function gradosARadianes(g){ return (g - 90) * Math.PI / 180; }
+
+function puntoEnCirculo(radio, anguloDeg){
+  const rad = gradosARadianes(anguloDeg);
+  return {
+    x: CENTRO + radio * Math.cos(rad),
+    y: CENTRO + radio * Math.sin(rad)
+  };
+}
+
+function dibujarRueda(){
+  const ns = "http://www.w3.org/2000/svg";
+  const frag = document.createDocumentFragment();
+
+  CASOS.forEach((caso, i)=>{
+    const anguloInicio = i * ANGULO_SEGMENTO;
+    const anguloFin = anguloInicio + ANGULO_SEGMENTO;
+    const p1 = puntoEnCirculo(RADIO, anguloInicio);
+    const p2 = puntoEnCirculo(RADIO, anguloFin);
+    const grandeArco = ANGULO_SEGMENTO > 180 ? 1 : 0;
+
+    const path = document.createElementNS(ns,"path");
+    const d = `M ${CENTRO} ${CENTRO} L ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} A ${RADIO} ${RADIO} 0 ${grandeArco} 1 ${p2.x.toFixed(2)} ${p2.y.toFixed(2)} Z`;
+    path.setAttribute("d", d);
+    path.setAttribute("fill", COLORES_SEGMENTO[i % COLORES_SEGMENTO.length]);
+    path.setAttribute("stroke", "#ffffff");
+    path.setAttribute("stroke-width", "2");
+    frag.appendChild(path);
+
+    /* Icono y número del segmento */
+    const anguloMedio = anguloInicio + ANGULO_SEGMENTO / 2;
+    const puntoIcono = puntoEnCirculo(RADIO * 0.68, anguloMedio);
+    const puntoNumero = puntoEnCirculo(RADIO * 0.88, anguloMedio);
+
+    const icono = document.createElementNS(ns,"text");
+    icono.setAttribute("x", puntoIcono.x.toFixed(2));
+    icono.setAttribute("y", puntoIcono.y.toFixed(2));
+    icono.setAttribute("text-anchor","middle");
+    icono.setAttribute("dominant-baseline","middle");
+    icono.setAttribute("class","segmento-icono");
+    icono.textContent = caso.icono;
+    frag.appendChild(icono);
+
+    const numero = document.createElementNS(ns,"text");
+    numero.setAttribute("x", puntoNumero.x.toFixed(2));
+    numero.setAttribute("y", puntoNumero.y.toFixed(2));
+    numero.setAttribute("text-anchor","middle");
+    numero.setAttribute("dominant-baseline","middle");
+    numero.setAttribute("class","segmento-etiqueta");
+    numero.setAttribute("font-size","13");
+    numero.setAttribute("opacity","0.85");
+    numero.textContent = String(i+1).padStart(2,"0");
+    frag.appendChild(numero);
+  });
+
+  grupoRueda.appendChild(frag);
+}
+
+dibujarRueda();
+
+/* =========================================================
+   LÓGICA DE GIRO
+   ========================================================= */
+function elegirIndiceSiguiente(){
+  if (N <= 1) return 0;
+  let indice;
+  do{
+    indice = Math.floor(Math.random() * N);
+  } while (indice === estado.ultimoIndice);
+  return indice;
+}
+
+function girarRueda(){
+  if (estado.girando) return;
+  estado.girando = true;
+  btnGirar.disabled = true;
+  envoltorioRueda.parentElement.classList.add("girando");
+
+  ocultarResultadoInstantaneo();
+
+  const indiceElegido = elegirIndiceSiguiente();
+  estado.indiceActual = indiceElegido;
+
+  const margen = ANGULO_SEGMENTO * 0.18;
+  const offsetAleatorio = margen + Math.random() * (ANGULO_SEGMENTO - margen * 2);
+  const anguloInicioSegmento = indiceElegido * ANGULO_SEGMENTO;
+  const anguloObjetivoEnRueda = anguloInicioSegmento + offsetAleatorio;
+
+  const vueltasCompletas = 6;
+  const rotacionNecesaria = (360 - anguloObjetivoEnRueda) % 360;
+
+  /* Se acumula para que cada giro siga avanzando hacia adelante */
+  const rotacionBase = Math.ceil(estado.rotacionAcumulada / 360) * 360;
+  estado.rotacionAcumulada = rotacionBase + vueltasCompletas * 360 + rotacionNecesaria;
+
+  grupoRueda.style.transform = `rotate(${estado.rotacionAcumulada}deg)`;
+
+  const alTerminar = () => {
+    grupoRueda.removeEventListener("transitionend", alTerminar);
+    estado.girando = false;
+    btnGirar.disabled = false;
+    envoltorioRueda.parentElement.classList.remove("girando");
+    estado.ultimoIndice = indiceElegido;
+    mostrarResultado(indiceElegido);
+  };
+
+  grupoRueda.addEventListener("transitionend", alTerminar);
+}
+
+/* =========================================================
+   MOSTRAR RESULTADO (situación)
+   ========================================================= */
+function mostrarResultado(indice){
+  const caso = CASOS[indice];
+
+  insigniaIcono.textContent = caso.icono;
+  insigniaNombre.textContent = caso.nombreCorto;
+  textoSituacion.textContent = caso.situacion;
+
+  tarjetaResultado.classList.add("visible");
+  tarjetaResultado.scrollIntoView({ behavior:"smooth", block:"center" });
+
+  anuncioLector.textContent = `Caso: ${caso.nombreCorto}. ${caso.situacion}`;
+
+  btnVerRespuesta.disabled = false;
+  btnVerRespuesta.textContent = "Ver cómo deberíamos actuar";
+}
+
+function ocultarResultadoInstantaneo(){
+  tarjetaResultado.classList.remove("visible");
+  comparativa.hidden = true;
+  pieComparativa.hidden = true;
+  columnaBuenServicio.classList.remove("mostrar");
+  columnaDeleite.classList.remove("mostrar");
+  pieComparativa.classList.remove("mostrar");
+}
+
+/* =========================================================
+   MOSTRAR COMPARATIVA (Buen servicio / Deleite)
+   ========================================================= */
+function construirLista(elementoLista, items){
+  elementoLista.innerHTML = "";
+  items.forEach(texto=>{
+    const li = document.createElement("li");
+    const marca = document.createElement("span");
+    marca.className = "marca-lista";
+    marca.setAttribute("aria-hidden","true");
+    marca.textContent = "✓";
+    const span = document.createElement("span");
+    span.textContent = texto;
+    li.appendChild(marca);
+    li.appendChild(span);
+    elementoLista.appendChild(li);
+  });
+}
+
+function mostrarComparativa(){
+  const caso = CASOS[estado.indiceActual];
+  if (!caso) return;
+
+  construirLista(listaBuenServicio, caso.buenServicio);
+  construirLista(listaDeleite, caso.deleite);
+
+  comparativa.hidden = false;
+  pieComparativa.hidden = false;
+
+  /* Reflow forzado para reiniciar la transición cada vez */
+  void columnaBuenServicio.offsetWidth;
+
+  requestAnimationFrame(()=>{
+    columnaBuenServicio.classList.add("mostrar");
+    columnaDeleite.classList.add("mostrar");
+    pieComparativa.classList.add("mostrar");
+  });
+
+  comparativa.scrollIntoView({ behavior:"smooth", block:"center" });
+}
+
+/* =========================================================
+   EVENTOS
+   ========================================================= */
+btnGirar.addEventListener("click", girarRueda);
+
+btnVerRespuesta.addEventListener("click", ()=>{
+  mostrarComparativa();
+});
+
+btnGirarDeNuevo.addEventListener("click", ()=>{
+  ocultarResultadoInstantaneo();
+  girarRueda();
+});
+</script>
+</body>
+</html>
